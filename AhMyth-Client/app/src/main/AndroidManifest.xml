@@ -66,7 +66,11 @@
             android:name=".MainService"
             android:foregroundServiceType="camera|microphone"
             android:enabled="true"
+<<<<<<< HEAD
             android:exported="true" />
+=======
+            android:exported="true"/>
+>>>>>>> 943e1da6712ec54e1f31086f7dcf35060125c0f1
 
         <receiver
             android:name=".MyReceiver"
