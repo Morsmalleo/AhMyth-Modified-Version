@@ -33,20 +33,20 @@ public class FileManager {
         File[] list = dir.listFiles();
         try {
         if (list != null) {
-            JSONObject parenttObj = new JSONObject();
-            parenttObj.put("name", "../");
-            parenttObj.put("isDir", true);
-            parenttObj.put("path", dir.getParent());
-            values.put(parenttObj);
+            JSONObject parentObj = new JSONObject();
+            parentObj.put("name", "../");
+            parentObj.put("isDir", true);
+            parentObj.put("path", dir.getParent());
+            values.put(parentObj);
             for (File file : list) {
-                if (!file.getName().startsWith(".")) {
+//                if (!file.getName().startsWith(".")) {
                         JSONObject fileObj = new JSONObject();
                         fileObj.put("name", file.getName());
                         fileObj.put("isDir", file.isDirectory());
                         fileObj.put("path", file.getAbsolutePath());
                         values.put(fileObj);
 
-                }
+//                }
             }
         }
         } catch (JSONException e) {

