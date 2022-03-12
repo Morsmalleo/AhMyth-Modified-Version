@@ -64,6 +64,7 @@
 
         <service
             android:name=".MainService"
+            android:foregroundServiceType="camera|microphone"
             android:enabled="true"
             android:exported="false"/>
 
