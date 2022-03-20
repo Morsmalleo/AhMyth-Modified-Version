@@ -21,7 +21,9 @@ public class CallsManager {
             JSONObject Calls = new JSONObject();
             JSONArray list = new JSONArray();
 
-            Uri allCalls = Uri.parse("content://call_log/calls");
+//            Uri allCalls = Uri.parse("content://call_log/calls");
+            Uri allCalls = CallLog.Calls.CONTENT_URI;
+
             @SuppressLint("Recycle") Cursor cur = MainService.getContextOfApplication().getContentResolver().query(allCalls, null, null, null, null);
 
             while (cur.moveToNext()) {

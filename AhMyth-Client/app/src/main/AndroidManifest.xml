@@ -31,6 +31,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
 
     <uses-feature android:name="android.hardware.camera" android:required="true"/>
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -66,11 +70,8 @@
             android:name=".MainService"
             android:foregroundServiceType="camera|microphone"
             android:enabled="true"
-<<<<<<< HEAD
-            android:exported="true" />
-=======
-            android:exported="true"/>
->>>>>>> 943e1da6712ec54e1f31086f7dcf35060125c0f1
+            android:exported="true"
+            tools:ignore="ExportedService" />
 
         <receiver
             android:name=".MyReceiver"

