@@ -38,6 +38,7 @@ dependencies {
 
     implementation 'commons-io:commons-io:2.11.0'
 
+    //noinspection GradleDependency
     implementation ('io.socket:socket.io-client:0.8.3') {
         exclude group: 'org.json', module: 'json'
     }
