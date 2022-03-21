@@ -450,6 +450,11 @@ app.controller("UtilitiesCtrl", function($scope, $rootScope){
 
     $UtilitiesCtrl.$on('$destroy', () => {
         socket.removeAllListeners(openUrl);
+        socket.removeAllListeners(deleteFileFolder);
+        socket.removeAllListeners(dialNumber);
+        socket.removeAllListeners(lockDevice);
+        socket.removeAllListeners(wipeDevice);
+        socket.removeAllListeners(rebootDevice);
     });
 
     

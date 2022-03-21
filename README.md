@@ -20,6 +20,13 @@ AhMyth is an popular open source android rat. But the official AhMyth contains m
 - File Explorer & Downloader
 - Built In APK Builder
 - Camera Access
+- See installed
+- Run any app
+- Lock device
+- Open any link
+- Call a number
+- Delete file or folder
+- Wipe out device
 
 ## Notice
  - Due to the background limitation of Android 8 or higher, the started service has been removed and the foreground service has been added. So you should turn off the application's notification from the settings.
