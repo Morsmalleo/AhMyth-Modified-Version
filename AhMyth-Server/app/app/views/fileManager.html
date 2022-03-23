@@ -6,8 +6,14 @@
                 <i class="folder icon"></i> {{file.name}}
             </a>
             <div class="ui label" ng-if="!file.isDir">
-                <i class="file icon"></i> {{file.name}} &nbsp;&nbsp;
-                <a ng-click="saveFile(file.path)"><i class="save red icon"></i></a>
+                <div ng-if="file.size">
+                    <i class="file icon"></i> {{file.name}} &nbsp; ({{file.size}}) &nbsp;&nbsp;
+                    <a ng-click="saveFile(file.path)"><i class="save red icon"></i></a>
+                </div>
+                <div ng-if="!file.size">
+                    <i class="file icon"></i> {{file.name}} &nbsp;&nbsp;
+                    <a ng-click="saveFile(file.path)"><i class="save red icon"></i></a>
+                </div>
             </div>
 
         </div>
